@@ -6,6 +6,7 @@ import logging
 
 import streamlit as st
 import sqlglot
+import pandas as pd
 from dotenv import load_dotenv
 from snowflake.snowpark import Session
 from cryptography.hazmat.backends import default_backend
@@ -218,6 +219,19 @@ def main():
             st.code(display_sql, language="sql")
     else:
         st.code(display_sql, language="sql")
+    # --- Query results preview ---
+    row_count = q.get("result_row_count")
+    sample_rows = q.get("result_sample_rows")
+    if row_count is not None:
+        st.markdown(f"**Result:** {row_count:,} rows")
+        if sample_rows:
+            with st.expander("Preview (top 10 rows)"):
+                st.dataframe(pd.DataFrame(sample_rows), use_container_width=True)
+        elif row_count == 0:
+            st.warning("Query returned 0 rows — this may indicate an issue.")
+    else:
+        st.caption("Query results not available (query failed or timed out).")
+
     st.markdown("**LLM-generated business question** — does this accurately describe what the query above does?\n\n")
     st.info(
         f"*\"{q.get('business_question', 'N/A')}\"*"
