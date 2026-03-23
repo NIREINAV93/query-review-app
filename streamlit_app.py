@@ -220,6 +220,16 @@ def main():
     else:
         st.code(display_sql, language="sql")
 
+    # --- Row count ---
+    row_count = q.get("result_row_count")
+    if row_count is not None:
+        if row_count == 0:
+            st.warning("Query returned 0 rows — this may indicate an issue.")
+        else:
+            st.markdown(f"**Result:** {row_count:,} rows")
+    else:
+        st.caption("Query results not available (query failed or timed out).")
+
     st.markdown("**LLM-generated business question** — does this accurately describe what the query above does?\n\n")
     st.info(
         f"*\"{q.get('business_question', 'N/A')}\"*"
