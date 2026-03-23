@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import base64
 import logging
 
@@ -198,11 +199,21 @@ def main():
         st.success("Already reviewed")
 
     raw_sql = q.get("query_text", "")
+
+    # Truncate long IN (...) lists for display
+    def truncate_in_lists(sql):
+        def _replace(m):
+            ids = m.group(1)
+            count = ids.count("'") // 2 or ids.count(",") + 1
+            return f"IN (/* ... {count} IDs ... */)"
+        return re.sub(r"IN\s*\((\s*'[^)]{500,})\)", _replace, sql, flags=re.IGNORECASE | re.DOTALL)
+
+    display_sql = truncate_in_lists(raw_sql)
     try:
-        formatted_sql = sqlglot.transpile(raw_sql, read="snowflake", pretty=True)[0]
+        display_sql = sqlglot.transpile(display_sql, read="snowflake", pretty=True)[0]
     except Exception:
-        formatted_sql = raw_sql
-    st.code(formatted_sql, language="sql")
+        pass
+    st.code(display_sql, language="sql")
     st.markdown("**LLM-generated business question** — does this accurately describe what the query above does?\n\n")
     st.info(
         f"*\"{q.get('business_question', 'N/A')}\"*"
