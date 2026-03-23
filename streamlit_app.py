@@ -213,7 +213,11 @@ def main():
         display_sql = sqlglot.transpile(display_sql, read="snowflake", pretty=True)[0]
     except Exception:
         pass
-    st.code(display_sql, language="sql")
+    if len(display_sql) > 3000:
+        with st.expander(f"SQL ({len(raw_sql.splitlines())} lines — click to expand)"):
+            st.code(display_sql, language="sql")
+    else:
+        st.code(display_sql, language="sql")
     st.markdown("**LLM-generated business question** — does this accurately describe what the query above does?\n\n")
     st.info(
         f"*\"{q.get('business_question', 'N/A')}\"*"
