@@ -1,0 +1,5 @@
+streamlit>=1.30
+snowflake-snowpark-python[pandas]>=1.0
+sqlglot>=26.0
+python-dotenv>=1.0
+cryptography>=41.0
